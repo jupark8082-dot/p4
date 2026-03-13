@@ -1,0 +1,103 @@
+# ============================================================
+# P4 - AI Power Plant Performance Predictor
+# 기본 설정 파일
+# [기본값] 항목은 현장 적용 시 조정 가능
+# ============================================================
+
+database:
+  # MS SQL 사용 시: mssql+pyodbc://user:pass@host/dbname?driver=ODBC+Driver+17+for+SQL+Server
+  # SQLite 폴백 시: sqlite:///data/p4.db
+  url: "sqlite:///data/p4.db"
+  pool_size: 5
+  max_overflow: 10
+  echo: false               # SQL 로그 출력 여부
+
+data:
+  sampling_interval_min: 1   # [기본값] 분 단위 집계 주기
+  realtime_retention_hours: 24  # [기본값] 실시간 데이터 보관 시간
+  history_retention_years: 2    # [기본값] 히스토리 보관 기간 (년)
+
+opc:
+  host: "localhost"
+  prog_id: "Matrikon.OPC.Simulation.1"
+  update_rate_ms: 1000       # OPC 구독 갱신 주기 (ms)
+  reconnect_max_retries: 5   # 자동 재접속 최대 횟수
+  reconnect_base_delay_sec: 2  # 재접속 지수 백오프 기본 간격 (초)
+
+deadband:
+  default_type: "percent"    # percent 또는 absolute
+  default_threshold: 0.5     # percent: 0.5%, absolute: 실제 값 차이
+
+prediction:
+  inference_interval_min: 5     # [기본값] 추론 주기 (분)
+  forecast_horizon_min: 60      # [기본값] 예측 범위 (분)
+  input_sequence_length: 60     # [기본값] 입력 시퀀스 길이 (스텝)
+
+model:
+  default_algorithm: "LSTM"     # [기본값] LSTM / GRU / RNN
+  max_versions: 5               # [기본값] 보관 모델 버전 수
+  training_schedule: "0 2 * * *" # [기본값] cron 표현식 (매일 02:00)
+  model_dir: "models/"          # 모델 저장 디렉토리
+
+drift:
+  method: "PSI"                  # [기본값] Drift 감지 방법
+  threshold: 0.2                 # [기본값] PSI 임계값
+  check_interval_days: 7         # [기본값] 검사 주기 (일)
+
+web:
+  host: "0.0.0.0"
+  port: 8000
+  max_trend_charts: 4            # [기본값] 동시 비교 차트 수
+  deviation_warn_pct: 5.0        # [기본값] 노랑 경고 임계값 (%)
+  deviation_alert_pct: 10.0      # [기본값] 빨강 경고 임계값 (%)
+
+auth:
+  secret_key: "CHANGE-ME-IN-PRODUCTION-USE-RANDOM-SECRET"
+  algorithm: "HS256"
+  access_token_expire_minutes: 480  # 8시간
+
+simulator:
+  enabled: true                  # 시뮬레이터 모드 활성화
+  num_tags: 20                   # 시뮬레이터 태그 수
+  base_interval_sec: 1           # 데이터 생성 주기 (초)
+  tags:
+    - name: "TEMP_BOILER_OUT"
+      unit: "°C"
+      base_value: 540.0
+      noise_amplitude: 5.0
+    - name: "PRESS_MAIN_STEAM"
+      unit: "MPa"
+      base_value: 16.5
+      noise_amplitude: 0.3
+    - name: "FLOW_FEED_WATER"
+      unit: "t/h"
+      base_value: 450.0
+      noise_amplitude: 10.0
+    - name: "TEMP_REHEAT_OUT"
+      unit: "°C"
+      base_value: 540.0
+      noise_amplitude: 4.0
+    - name: "POWER_OUTPUT"
+      unit: "MW"
+      base_value: 500.0
+      noise_amplitude: 8.0
+    - name: "EFF_BOILER"
+      unit: "%"
+      base_value: 92.5
+      noise_amplitude: 0.5
+    - name: "TEMP_EXHAUST_GAS"
+      unit: "°C"
+      base_value: 135.0
+      noise_amplitude: 3.0
+    - name: "PRESS_CONDENSER"
+      unit: "kPa"
+      base_value: 5.0
+      noise_amplitude: 0.2
+    - name: "TEMP_COOLING_WATER"
+      unit: "°C"
+      base_value: 25.0
+      noise_amplitude: 1.0
+    - name: "VIBRATION_TURBINE"
+      unit: "mm/s"
+      base_value: 2.5
+      noise_amplitude: 0.3
