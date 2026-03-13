@@ -197,7 +197,7 @@ def _get_latest_predictions(config) -> dict[str, float]:
             .join(subq, PredictResult.id == subq.c.max_id)
             .all()
         )
-        return {r.tag_name: r.predict_value for r in results}
+        return {r.tag_name: r.predicted_value for r in results}
     except Exception as e:
         logger.error(f"Error fetching predictions: {e}")
         return {}
@@ -335,11 +335,26 @@ async def get_system_status():
 # AI 관리 API
 # ---------------------------------------------------------------------------
 
+from fastapi import BackgroundTasks
+
+def run_training_task(tag_name: str):
+    from p4.ai.pipeline import TrainingPipeline
+    try:
+        logger.info(f"Background training started for {tag_name}")
+        pipeline = TrainingPipeline()
+        success = pipeline.run(tag_name)
+        if success:
+            logger.info(f"Background training completed for {tag_name}")
+        else:
+            logger.warning(f"Background training failed or skipped for {tag_name}")
+    except Exception as e:
+        logger.error(f"Error in background training task for {tag_name}: {e}")
+
 @app.post("/api/ai/train")
-async def trigger_training(tag_name: str = "ALL"):
+async def trigger_training(background_tasks: BackgroundTasks, tag_name: str = "POWER_OUTPUT"):
     """모델 학습 파이프라인 수동 트리거 (비동기 수행)."""
-    # 실제 구현 시 BackgroundTasks 활용하여 trainer.find_best_model 호출
-    return {"status": "accepted", "message": f"Training started for {tag_name}"}
+    background_tasks.add_task(run_training_task, tag_name)
+    return {"status": "accepted", "message": f"Training task mapped for {tag_name}"}
 
 
 @app.get("/api/ai/models")

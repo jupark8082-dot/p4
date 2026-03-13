@@ -23,6 +23,8 @@ dependencies = [
     "passlib[bcrypt]>=1.7",
     "numpy>=1.26",
     "pandas>=2.1",
+    "onnx>=1.15",
+    "onnxscript>=0.1",
 ]
 
 [project.optional-dependencies]
@@ -34,6 +36,7 @@ dev = [
 
 [project.scripts]
 p4 = "p4.main:main"
+p4-cs = "p4.gui.app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
