@@ -4,6 +4,7 @@
 - [x] Create `.agent/` directory in repo
 - [x] Create `.agent/task.md`
 - [x] Create `.agent/implementation_plan.md`
+- [x] Create `.agent/project_status.md`
 - [ ] User to commit and push `.agent/` folder to GitHub
 
 ## 2. Environment & Context Synchronization
